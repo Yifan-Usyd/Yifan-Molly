@@ -4,18 +4,482 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>宝宝你爱我吗？</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;600;700&display=swap');
+        
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #ffeef0 0%, #f8d7da 50%, #e8c5d4 100%);
+            text-align: center;
+            font-family: 'Noto Sans SC', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* 背景装饰 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(255, 182, 193, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 192, 203, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(255, 218, 224, 0.2) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* 浮动的心形装饰 */
+        .floating-hearts {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .heart {
+            position: absolute;
+            color: rgba(255, 182, 193, 0.6);
+            font-size: 20px;
+            animation: floatUp 8s infinite linear;
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* 页面内容居中 */
+        .container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.5s ease;
+        }
+
+        /* 让图片大小适中并添加阴影 */
+        #mainImage {
+            width: 200px;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            filter: drop-shadow(0 8px 16px rgba(0,0,0,0.1));
+            border-radius: 20px;
+            animation: gentle-bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes gentle-bounce {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* 文字样式 */
+        h1 {
+            font-size: 32px;
+            color: #68495b;
+            margin: 30px 0;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            letter-spacing: 1px;
+        }
+
+        /* 按钮容器 */
+        .buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        /* 按钮样式 */
+        button {
+            font-size: 18px;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            font-weight: 600;
+            font-family: 'Noto Sans SC', Arial, sans-serif;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        button:hover::before {
+            left: 100%;
+        }
+
+        #yes {
+            background: linear-gradient(135deg, #ff6b9d, #d4818e);
+            color: white;
+            transform-origin: center;
+        }
+
+        #yes:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(212, 129, 142, 0.4);
+        }
+
+        #no {
+            background: linear-gradient(135deg, #74a9d8, #6784b1);
+            color: white;
+            position: relative;
+        }
+
+        #no:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(103, 132, 177, 0.4);
+        }
+
+        /* Yes 完全填满屏幕 */
+        .yes-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, #ffeef0 0%, #ffb6c1 50%, #ff91a4 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.8s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .yes-text {
+            font-size: 36px;
+            color: #68495b;
+            margin-bottom: 30px;
+            animation: heartbeat 1.5s ease-in-out infinite;
+            text-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            font-weight: 700;
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .yes-image {
+            width: 200px;
+            animation: rotate-hug 3s ease-in-out infinite;
+            filter: drop-shadow(0 8px 16px rgba(0,0,0,0.1));
+        }
+
+        @keyframes rotate-hug {
+            0%, 100% { transform: rotate(-5deg) scale(1); }
+            50% { transform: rotate(5deg) scale(1.1); }
+        }
+
+        /* 流星雨效果 */
+        .meteor-shower {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        .meteor {
+            position: absolute;
+            width: 2px;
+            height: 60px;
+            background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.8), rgba(255, 182, 193, 0.8));
+            border-radius: 50%;
+            animation: meteor-fall 2s linear infinite;
+        }
+
+        @keyframes meteor-fall {
+            0% {
+                transform: translateY(-100px) translateX(0px) rotate(45deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) translateX(-200px) rotate(45deg);
+                opacity: 0;
+            }
+        }
+
+        /* 爱心粒子效果 */
+        .heart-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 998;
+        }
+
+        .heart-particle {
+            position: absolute;
+            color: rgba(255, 105, 157, 0.8);
+            font-size: 24px;
+            animation: heart-float 4s ease-in-out infinite;
+        }
+
+        @keyframes heart-float {
+            0% {
+                transform: translateY(0px) scale(0);
+                opacity: 0;
+            }
+            20% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            80% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) scale(0);
+                opacity: 0;
+            }
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 28px;
+            }
+            #mainImage {
+                width: 150px;
+            }
+            button {
+                font-size: 16px;
+                padding: 12px 25px;
+            }
+            .yes-text {
+                font-size: 28px;
+            }
+            .yes-image {
+                width: 160px;
+            }
+        }
+    </style>
 </head>
 <body>
+    <!-- 浮动心形装饰 -->
+    <div class="floating-hearts" id="floatingHearts"></div>
+
     <div class="container">
         <img id="mainImage" src="images/heart.png" alt="爱心">
         <h1 id="question">宝宝你爱我吗？</h1>
         <div class="buttons">
-            <button id="yes">爱呢爱呢</button>
+            <button id="yes">爱呢爱呢 ♡</button>
             <button id="no">完全不爱</button>
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script>
+        let yesButton = document.getElementById("yes");
+        let noButton = document.getElementById("no");
+        let questionText = document.getElementById("question");
+        let mainImage = document.getElementById("mainImage");
+
+        let clickCount = 0;
+
+        // No 按钮的文字变化
+        const noTexts = [
+            "？你认真的吗… 😳", 
+            "要不再想想？🤔", 
+            "不许选这个！😤", 
+            "我会很伤心…😢", 
+            "不行 😭"
+        ];
+
+        // 创建浮动心形
+        function createFloatingHearts() {
+            const heartsContainer = document.getElementById('floatingHearts');
+            setInterval(() => {
+                const heart = document.createElement('div');
+                heart.className = 'heart';
+                heart.innerHTML = '♡';
+                heart.style.left = Math.random() * 100 + 'vw';
+                heart.style.animationDelay = Math.random() * 2 + 's';
+                heart.style.fontSize = (Math.random() * 10 + 15) + 'px';
+                heartsContainer.appendChild(heart);
+
+                setTimeout(() => {
+                    heart.remove();
+                }, 8000);
+            }, 1000);
+        }
+
+        // 创建流星雨效果
+        function createMeteorShower() {
+            const meteorShower = document.createElement('div');
+            meteorShower.className = 'meteor-shower';
+            document.body.appendChild(meteorShower);
+
+            function createMeteor() {
+                const meteor = document.createElement('div');
+                meteor.className = 'meteor';
+                meteor.style.left = Math.random() * window.innerWidth + 'px';
+                meteor.style.animationDelay = Math.random() * 2 + 's';
+                meteor.style.animationDuration = (Math.random() * 1 + 1.5) + 's';
+                meteorShower.appendChild(meteor);
+
+                setTimeout(() => {
+                    meteor.remove();
+                }, 3000);
+            }
+
+            // 创建多个流星
+            for (let i = 0; i < 15; i++) {
+                setTimeout(() => createMeteor(), i * 200);
+            }
+
+            // 持续创建流星
+            const meteorInterval = setInterval(() => {
+                createMeteor();
+            }, 300);
+
+            return meteorInterval;
+        }
+
+        // 创建爱心粒子效果
+        function createHeartParticles() {
+            const particlesContainer = document.createElement('div');
+            particlesContainer.className = 'heart-particles';
+            document.body.appendChild(particlesContainer);
+
+            function createParticle() {
+                const particle = document.createElement('div');
+                particle.className = 'heart-particle';
+                particle.innerHTML = '♡';
+                particle.style.left = Math.random() * window.innerWidth + 'px';
+                particle.style.top = window.innerHeight + 'px';
+                particle.style.animationDelay = Math.random() * 2 + 's';
+                particle.style.color = `hsl(${Math.random() * 60 + 320}, 70%, 60%)`;
+                particlesContainer.appendChild(particle);
+
+                setTimeout(() => {
+                    particle.remove();
+                }, 4000);
+            }
+
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => createParticle(), i * 200);
+            }
+
+            const particleInterval = setInterval(() => {
+                createParticle();
+            }, 400);
+
+            return particleInterval;
+        }
+
+        // No 按钮点击事件
+        noButton.addEventListener("click", function() {
+            clickCount++;
+
+            // 让 Yes 变大，每次放大 1.2 倍
+            let yesSize = 1 + (clickCount * 1.2);
+            yesButton.style.transform = `scale(${yesSize})`;
+
+            // 挤压 No 按钮，每次右移 50px
+            let noOffset = clickCount * 50;
+            noButton.style.transform = `translateX(${noOffset}px)`;
+
+            // 让图片和文字往上移动
+            let moveUp = clickCount * 25; 
+            mainImage.style.transform = `translateY(-${moveUp}px)`;
+            questionText.style.transform = `translateY(-${moveUp}px)`;
+
+            // No 文案变化（前 5 次变化）
+            if (clickCount <= 5) {
+                noButton.innerText = noTexts[clickCount - 1];
+            }
+
+            // 图片变化（前 5 次变化）
+            if (clickCount === 1) mainImage.src = "images/shocked.png"; // 震惊
+            if (clickCount === 2) mainImage.src = "images/think.png";   // 思考
+            if (clickCount === 3) mainImage.src = "images/angry.png";   // 生气
+            if (clickCount === 4) mainImage.src = "images/crying.png";  // 哭
+            if (clickCount >= 5) mainImage.src = "images/crying.png";  // 之后一直是哭
+        });
+
+        // Yes 按钮点击后，进入表白成功页面
+        yesButton.addEventListener("click", function() {
+            document.body.innerHTML = `
+                <div class="yes-screen">
+                    <h1 class="yes-text">!!!我也爱你!! ( >᎑<)♡︎ᐝ</h1>
+                    <img src="images/hug.png" alt="拥抱" class="yes-image">
+                </div>
+            `;
+
+            document.body.style.overflow = "hidden";
+
+            // 启动特效
+            setTimeout(() => {
+                createMeteorShower();
+                createHeartParticles();
+            }, 500);
+        });
+
+        // 初始化浮动心形
+        createFloatingHearts();
+
+        // 添加按钮悬停效果
+        yesButton.addEventListener('mouseenter', function() {
+            let currentScale = 1 + (clickCount * 1.2);
+            this.style.transform = `scale(${currentScale * 1.05})`;
+        });
+
+        yesButton.addEventListener('mouseleave', function() {
+            let currentScale = 1 + (clickCount * 1.2);
+            this.style.transform = `scale(${currentScale})`;
+        });
+    </script>
 </body>
 </html>
